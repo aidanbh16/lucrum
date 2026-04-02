@@ -1,11 +1,38 @@
-# Node
+# =========================
+# General
+# =========================
+.DS_Store
+.env
+*.log
+
+# =========================
+# Frontend (Next.js)
+# =========================
 frontend/node_modules/
 frontend/.next/
-
-# Env files
-.env
-backend/.env
+frontend/out/
 frontend/.env
 
-# Mac junk
-.DS_Store
+# =========================
+# Backend (Node + TypeScript)
+# =========================
+*/node_modules/
+*/dist/
+*/build/
+*/.env
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Testing / Coverage
+# =========================
+coverage/
