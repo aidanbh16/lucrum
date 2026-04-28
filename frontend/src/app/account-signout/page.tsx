@@ -1,3 +1,6 @@
+
+"use client";
+
 import AuthCard from "@/components/auth/AuthCard";
 import AccountSignOutPanel from "@/components/auth/AccountSignOutPanel";
 import { authStyles } from "@/styles/auth";

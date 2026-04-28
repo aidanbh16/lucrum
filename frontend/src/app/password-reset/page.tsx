@@ -1,3 +1,6 @@
+
+"use client";
+
 import AuthCard from "@/components/auth/AuthCard";
 import PasswordResetForm from "@/components/auth/PasswordResetForm";
 import { authStyles } from "@/styles/auth";

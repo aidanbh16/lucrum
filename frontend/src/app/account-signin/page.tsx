@@ -1,3 +1,6 @@
+
+"use client";
+
 import AuthCard from "@/components/auth/AuthCard";
 import AccountSignInForm from "@/components/auth/AccountSignInForm";
 import { authStyles } from "@/styles/auth";
