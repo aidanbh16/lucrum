@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authStyles } from "@/styles/auth";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
+
 export default function AccountSignInForm() {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validateForm = (): string => {
-    if (!username.trim() || !password.trim()) {
-      return "Username and password are required.";
+    if (!email.trim() || !password.trim()) {
+      return "Email and password are required.";
     }
 
     return "";
@@ -35,13 +38,14 @@ export default function AccountSignInForm() {
     try {
       setLoading(true);
 
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          username: username.trim(),
+          email: email.trim(),
           password,
         }),
       });
@@ -49,14 +53,11 @@ export default function AccountSignInForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Incorrect username or password.");
+        setError(data.error || data.message || "Incorrect email or password.");
         return;
       }
 
-      // Later, when backend auth is ready, store token here if needed
-      // localStorage.setItem("token", data.access_token);
-
-      router.push("/planner");
+      router.push("/");
     } catch {
       setError("Could not connect to the server.");
     } finally {
@@ -68,17 +69,17 @@ export default function AccountSignInForm() {
     <>
       <form onSubmit={handleSubmit} className={authStyles.form}>
         <div>
-          <label htmlFor="username" className={authStyles.label}>
-            Username
+          <label htmlFor="email" className={authStyles.label}>
+            Email
           </label>
           <input
-            id="username"
-            name="username"
-            type="text"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter email"
             className={authStyles.input}
           />
         </div>

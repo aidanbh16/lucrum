@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { incomeStyles } from "@/styles/income";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_IMS_DOMAIN || "http://localhost:8081";
 
 type CategoryType = "expense" | "savings" | "credit/debt";
 type SortOption =
@@ -112,6 +114,23 @@ export default function AllocationManagement({
   const [editAllocationAmount, setEditAllocationAmount] = useState("");
   const [editAllocationError, setEditAllocationError] = useState("");
 
+  const saveAllocationsToBackend = async (updatedCategories: Category[]) => {
+    try {
+      await fetch(`${API_BASE_URL}/expenses/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          categories: updatedCategories,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save allocations", err);
+    }
+  };
+
   const sortedCategories = useMemo(() => {
     const sorted = [...categories];
 
@@ -157,7 +176,12 @@ export default function AllocationManagement({
       allocations: [],
     };
 
-    setCategories((prev) => [...prev, newCategory]);
+    setCategories((prev) => {
+      const updated = [...prev, newCategory];
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
+
     setSelectedCategoryId(newCategory.id);
     setCategoryName("");
     setCategoryType("");
@@ -185,17 +209,20 @@ export default function AllocationManagement({
       return;
     }
 
-    setCategories((prev) =>
-      prev.map((category) =>
+    setCategories((prev) => {
+      const updated = prev.map((category) =>
         category.id === categoryId
           ? {
-            ...category,
-            name: editCategoryName.trim(),
-            type: editCategoryType,
-          }
+              ...category,
+              name: editCategoryName.trim(),
+              type: editCategoryType,
+            }
           : category
-      )
-    );
+      );
+
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
 
     cancelEditingCategory();
   };
@@ -206,14 +233,18 @@ export default function AllocationManagement({
     );
 
     const confirmed = window.confirm(
-      `Delete "${categoryToDelete?.name ?? "this category"}" and all related allocations?`
+      `Delete "${
+        categoryToDelete?.name ?? "this category"
+      }" and all related allocations?`
     );
 
     if (!confirmed) return;
 
-    setCategories((prev) =>
-      prev.filter((category) => category.id !== categoryId)
-    );
+    setCategories((prev) => {
+      const updated = prev.filter((category) => category.id !== categoryId);
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
 
     if (selectedCategoryId === categoryId) {
       setSelectedCategoryId(null);
@@ -257,16 +288,19 @@ export default function AllocationManagement({
       amount: parsedAmount,
     };
 
-    setCategories((prev) =>
-      prev.map((category) =>
+    setCategories((prev) => {
+      const updated = prev.map((category) =>
         category.id === selectedCategory.id
           ? {
-            ...category,
-            allocations: [...category.allocations, newAllocation],
-          }
+              ...category,
+              allocations: [...category.allocations, newAllocation],
+            }
           : category
-      )
-    );
+      );
+
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
 
     setAllocationName("");
     setAllocationAmount("");
@@ -306,24 +340,27 @@ export default function AllocationManagement({
       return;
     }
 
-    setCategories((prev) =>
-      prev.map((category) =>
+    setCategories((prev) => {
+      const updated = prev.map((category) =>
         category.id === categoryId
           ? {
-            ...category,
-            allocations: category.allocations.map((allocation) =>
-              allocation.id === allocationId
-                ? {
-                  ...allocation,
-                  name: editAllocationName.trim(),
-                  amount: parsedAmount,
-                }
-                : allocation
-            ),
-          }
+              ...category,
+              allocations: category.allocations.map((allocation) =>
+                allocation.id === allocationId
+                  ? {
+                      ...allocation,
+                      name: editAllocationName.trim(),
+                      amount: parsedAmount,
+                    }
+                  : allocation
+              ),
+            }
           : category
-      )
-    );
+      );
+
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
 
     cancelEditingAllocation();
   };
@@ -339,18 +376,21 @@ export default function AllocationManagement({
 
     if (!confirmed) return;
 
-    setCategories((prev) =>
-      prev.map((category) =>
+    setCategories((prev) => {
+      const updated = prev.map((category) =>
         category.id === categoryId
           ? {
-            ...category,
-            allocations: category.allocations.filter(
-              (allocation) => allocation.id !== allocationId
-            ),
-          }
+              ...category,
+              allocations: category.allocations.filter(
+                (allocation) => allocation.id !== allocationId
+              ),
+            }
           : category
-      )
-    );
+      );
+
+      saveAllocationsToBackend(updated);
+      return updated;
+    });
 
     if (editingAllocationId === allocationId) {
       cancelEditingAllocation();
@@ -366,17 +406,17 @@ export default function AllocationManagement({
 
   return (
     <div>
-      {/* <div className="mb-4 text-white">
-        <p>Total Income: ${totalIncome.toFixed(2)}</p>
-        <p>Allocated: ${totalAllocated.toFixed(2)}</p>
-        <p>Remaining: ${remainingIncome.toFixed(2)}</p>
-      </div> */}
-
-      <h2 className={incomeStyles.title} style={{ textAlign: "center", marginBottom: "15px" }}>
+      <h2
+        className={incomeStyles.title}
+        style={{ textAlign: "center", marginBottom: "15px" }}
+      >
         Net Income
       </h2>
+
       <div className={`${incomeStyles.card} flex flex-col max-w-md mx-auto mb-5`}>
-          <p className={incomeStyles.title}> Remaining: ${remainingIncome.toFixed(2)}</p>
+        <p className={incomeStyles.title}>
+          Remaining: ${remainingIncome.toFixed(2)}
+        </p>
       </div>
 
       <div className="w-full text-white">
@@ -618,7 +658,9 @@ export default function AllocationManagement({
                             <div className="mt-4 flex flex-wrap gap-2">
                               <button
                                 type="button"
-                                onClick={() => setSelectedCategoryId(category.id)}
+                                onClick={() =>
+                                  setSelectedCategoryId(category.id)
+                                }
                                 className="rounded-xl border border-slate-600 px-4 py-2 text-sm text-slate-200 transition hover:bg-slate-800"
                               >
                                 View Allocations
@@ -715,7 +757,9 @@ export default function AllocationManagement({
                           step="0.01"
                           min="0"
                           value={allocationAmount}
-                          onChange={(e) => setAllocationAmount(e.target.value)}
+                          onChange={(e) =>
+                            setAllocationAmount(e.target.value)
+                          }
                           placeholder="0.00"
                           className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-slate-500"
                         />
@@ -772,9 +816,7 @@ export default function AllocationManagement({
                                         type="text"
                                         value={editAllocationName}
                                         onChange={(e) =>
-                                          setEditAllocationName(
-                                            e.target.value
-                                          )
+                                          setEditAllocationName(e.target.value)
                                         }
                                         className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-white outline-none focus:border-slate-500"
                                       />

@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authStyles } from "@/styles/auth";
-import { signupUser } from "@/library/auth";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
 
 export default function AccountCreationForm() {
   const router = useRouter();
@@ -41,6 +43,14 @@ export default function AccountCreationForm() {
       return "Password must be at least 8 characters long.";
     }
 
+    if (!/[A-Z]/.test(password)) {
+      return "Password must contain at least one capital letter.";
+    }
+
+    if (!/[^a-zA-Z0-9]/.test(password)) {
+      return "Password must contain at least one special character.";
+    }
+
     if (password !== confirmPassword) {
       return "Passwords do not match.";
     }
@@ -62,11 +72,25 @@ export default function AccountCreationForm() {
     try {
       setLoading(true);
 
-      const data = await signupUser(
-        username.trim(),
-        email.trim(),
-        password
-      );
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || data.message || "Could not create account.");
+        return;
+      }
 
       setSuccess(data.message || "Account successfully created!");
 
@@ -78,8 +102,8 @@ export default function AccountCreationForm() {
       setTimeout(() => {
         router.push("/account-signin");
       }, 1000);
-    } catch (err: any) {
-      setError(err.message || "Could not connect to the server.");
+    } catch {
+      setError("Could not connect to the server.");
     } finally {
       setLoading(false);
     }

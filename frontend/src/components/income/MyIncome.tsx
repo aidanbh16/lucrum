@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { incomeStyles } from "@/styles/income";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_IMS_DOMAIN || "http://localhost:8081";
 
 type Stream = {
   id: string;
@@ -22,6 +24,8 @@ type MyIncomeProps = {
 
 export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
   const [saved, setSaved] = useState<SavedStream[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [streams, setStreams] = useState<Stream[]>([
     { id: crypto.randomUUID(), source: "", amount: "" },
@@ -29,7 +33,9 @@ export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
 
   const total = saved.reduce((sum, s) => sum + s.amount, 0);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setError("");
+
     const preparedData: SavedStream[] = streams
       .filter((s) => s.source.trim() !== "" || s.amount.trim() !== "")
       .map((s) => ({
@@ -38,10 +44,37 @@ export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
         amount: parseFloat(s.amount) || 0,
       }));
 
-    setSaved(preparedData);
-
     const newTotal = preparedData.reduce((sum, s) => sum + s.amount, 0);
-    setTotalIncome(newTotal);
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/income/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          incomeSources: preparedData,
+          totalIncome: newTotal,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || data.message || "Could not save income.");
+        return;
+      }
+
+      setSaved(preparedData);
+      setTotalIncome(newTotal);
+    } catch {
+      setError("Could not connect to the income server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateStream = (index: number, field: keyof Stream, value: string) => {
@@ -89,7 +122,6 @@ export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
 
   return (
     <div className={incomeStyles.pageWrapper}>
-
       <div className={incomeStyles.sectionWrapper}>
         <div className={`${incomeStyles.card} flex flex-col`}>
           <h2 className={incomeStyles.title} style={{ textAlign: "center" }}>
@@ -182,9 +214,19 @@ export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
             ))}
           </div>
 
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {error}
+            </div>
+          )}
+
           <div className="mt-auto pt-10">
-            <button className={incomeStyles.button} onClick={handleSave}>
-              Save
+            <button
+              className={incomeStyles.button}
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>

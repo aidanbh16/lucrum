@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authStyles } from "@/styles/auth";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
+
 export default function AccountSignOutPanel() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -16,21 +19,21 @@ export default function AccountSignOutPanel() {
     try {
       setLoading(true);
 
-      // Optional future backend logout call
-      // await fetch("http://localhost:8000/logout", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
 
-      // Clear frontend auth data
-      localStorage.removeItem("token");
+      const data = await response.json();
 
-      // Redirect back to sign-in
+      if (!response.ok) {
+        setError(data.error || data.message || "Could not sign out right now.");
+        return;
+      }
+
       router.push("/account-signin");
     } catch {
-      setError("Could not sign out right now.");
+      setError("Could not connect to the server.");
     } finally {
       setLoading(false);
     }
@@ -58,8 +61,8 @@ export default function AccountSignOutPanel() {
       <div className="space-y-2 text-center text-sm text-slate-400">
         <p>
           Changed your mind?{" "}
-          <Link href="/account-signin" className={authStyles.link}>
-            Return to Sign In
+          <Link href="/" className={authStyles.link}>
+            Return to Dashboard
           </Link>
         </p>
 
