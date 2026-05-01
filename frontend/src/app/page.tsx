@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FinalAllocation from "@/components/allocation/FinalAllocation";
 import MyIncome from "@/components/income/MyIncome";
 import { incomeStyles } from "@/styles/income";
 import Image from "next/image";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
 
 export default function Home() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [totalIncome, setTotalIncome] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/user`, {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          window.location.href = "/account-signin";
+          return;
+        }
+      } catch {
+        window.location.href = "/account-signin";
+        return;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const handleSignOut = () => {
     if (isSigningOut) return;
@@ -17,7 +42,10 @@ export default function Home() {
     window.location.href = "/account-signin";
   };
 
-
+  // 🔥 PREVENT FLASH BEFORE CHECK
+  if (loading) {
+    return <div className="text-white text-center mt-10">Loading...</div>;
+  }
 
   return (
     <main className={incomeStyles.pageWrapper}>
@@ -33,10 +61,12 @@ export default function Home() {
           />
         </div>
 
-          <h1 className={`${incomeStyles.title} text-center`}>Welcome to Lucrum</h1>
-          <p className={`${incomeStyles.subtitle} mt-2 text-center`}>
-            Manage your monthly income and allocations in one place.
-          </p>
+        <h1 className={`${incomeStyles.title} text-center`}>
+          Welcome to Lucrum
+        </h1>
+        <p className={`${incomeStyles.subtitle} mt-2 text-center`}>
+          Manage your monthly income and allocations in one place.
+        </p>
 
         <section className="mb-8">
           <MyIncome setTotalIncome={setTotalIncome} />
@@ -53,13 +83,12 @@ export default function Home() {
           onClick={handleSignOut}
           disabled={isSigningOut}
           className={`${incomeStyles.button} !w-auto px-6 ${
-          isSigningOut ? "cursor-not-allowed opacity-60" : "" }`}
+            isSigningOut ? "cursor-not-allowed opacity-60" : ""
+          }`}
         >
           {isSigningOut ? "Signing Out..." : "Sign Out"}
         </button>
       </div>
-
     </main>
-
   );
 }

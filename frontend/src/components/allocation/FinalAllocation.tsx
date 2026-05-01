@@ -114,22 +114,30 @@ export default function AllocationManagement({
   const [editAllocationAmount, setEditAllocationAmount] = useState("");
   const [editAllocationError, setEditAllocationError] = useState("");
 
-  const saveAllocationsToBackend = async (updatedCategories: Category[]) => {
-    try {
-      await fetch(`${API_BASE_URL}/expenses/update`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          categories: updatedCategories,
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to save allocations", err);
+  const saveExpenseToBackend = async (name: string, amount: number) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/expenses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        name,
+        amount,
+        type: "variable",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(data.error || "Failed to save expense");
     }
-  };
+  } catch (err) {
+    console.error("Failed to save expense", err);
+  }
+};
 
   const sortedCategories = useMemo(() => {
     const sorted = [...categories];
@@ -178,7 +186,6 @@ export default function AllocationManagement({
 
     setCategories((prev) => {
       const updated = [...prev, newCategory];
-      saveAllocationsToBackend(updated);
       return updated;
     });
 
@@ -220,7 +227,7 @@ export default function AllocationManagement({
           : category
       );
 
-      saveAllocationsToBackend(updated);
+      //saveAllocationsToBackend(updated);
       return updated;
     });
 
@@ -242,7 +249,7 @@ export default function AllocationManagement({
 
     setCategories((prev) => {
       const updated = prev.filter((category) => category.id !== categoryId);
-      saveAllocationsToBackend(updated);
+      //saveAllocationsToBackend(updated);
       return updated;
     });
 
@@ -288,19 +295,18 @@ export default function AllocationManagement({
       amount: parsedAmount,
     };
 
-    setCategories((prev) => {
-      const updated = prev.map((category) =>
-        category.id === selectedCategory.id
-          ? {
-              ...category,
-              allocations: [...category.allocations, newAllocation],
-            }
-          : category
-      );
+    saveExpenseToBackend(newAllocation.name, newAllocation.amount);
 
-      saveAllocationsToBackend(updated);
-      return updated;
-    });
+    setCategories((prev) =>
+    prev.map((category) =>
+    category.id === selectedCategory.id
+      ? {
+          ...category,
+          allocations: [...category.allocations, newAllocation],
+        }
+      : category
+      )
+    );
 
     setAllocationName("");
     setAllocationAmount("");
@@ -358,7 +364,7 @@ export default function AllocationManagement({
           : category
       );
 
-      saveAllocationsToBackend(updated);
+      //saveAllocationsToBackend(updated);
       return updated;
     });
 
@@ -388,7 +394,7 @@ export default function AllocationManagement({
           : category
       );
 
-      saveAllocationsToBackend(updated);
+      //saveAllocationsToBackend(updated);
       return updated;
     });
 

@@ -50,14 +50,13 @@ export default function MyIncome({ setTotalIncome }: MyIncomeProps) {
       setLoading(true);
 
       const response = await fetch(`${API_BASE_URL}/income/update`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
         body: JSON.stringify({
-          incomeSources: preparedData,
-          totalIncome: newTotal,
+          amount: newTotal,
         }),
       });
 
