@@ -36,13 +36,21 @@ export default function Home() {
     checkAuth();
   }, []);
 
-  const handleSignOut = () => {
-    if (isSigningOut) return;
-    setIsSigningOut(true);
-    window.location.href = "/account-signin";
-  };
+  const handleSignOut = async () => {
+  if (isSigningOut) return;
 
-  // 🔥 PREVENT FLASH BEFORE CHECK
+  setIsSigningOut(true);
+
+  try {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    window.location.href = "/account-signin";
+  }
+};
+
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;
   }
