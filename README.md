@@ -61,5 +61,35 @@ Authentication state is managed via JWT tokens stored in HTTP-only cookies, with
 
 ## Instructions
 
-The YouTube video link below will walk through the steps needed to effectively run the Lucrum project through your own device: https://youtu.be/2uu_PGzhg7c
+The YouTube video below shows how to run the Lucrum project locally:
+https://youtu.be/2uu_PGzhg7c
+
+To follow along, download the following repositories:
+
+[lucrum-income-management](https://github.com/aidanbh16/lucrum-income-management)
+[lucrum-account-management](https://github.com/aidanbh16/lucrum-account-management)
+
+Open all three in VS Code.
+Run each project in its own terminal using npm run dev.
+
+Once running, open the frontend link shown in the terminal (usually http://localhost:3000).
+
+The video uses Developer Tools and the Network tab to show how the frontend communicates with the backend.
+
+It walks through:
+
+Account creation
+Account sign-in
+The main dashboard
+
+On the main page, it demonstrates:
+
+Adding income sources
+Creating categories
+Adding expense allocations
+
+Finally, it shows:
+
+The sign-out button
+The password reset page
 
