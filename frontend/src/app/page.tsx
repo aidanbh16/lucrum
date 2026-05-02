@@ -6,7 +6,6 @@ import MyIncome from "@/components/income/MyIncome";
 import { incomeStyles } from "@/styles/income";
 import Image from "next/image";
 
-// 🔥 FIXED: use AMS (auth service), NOT IMS
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_AMS_DOMAIN ||
   (typeof window !== "undefined" && window.location.hostname === "localhost"
