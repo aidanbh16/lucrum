@@ -38,13 +38,6 @@ Authentication state is managed via JWT tokens stored in HTTP-only cookies, with
 | /account-signout	| Sign out page        |
 | /password-reset   | Passwrord reset page |
 
-## Authentication Flow
-
-Unauthenticated users are redirected to /account-signin
-Authenticated users attempting to access auth pages are redirected to /
-Authentication state is determined on each request via cookies
-Middleware is used to protect restricted routes
-
 ---
 
 ## Environment Variables
