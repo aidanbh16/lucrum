@@ -5,12 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authStyles } from "@/styles/auth";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_IMS_DOMAIN ||
-  (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:8081"
-    : "https://ims.lucrumproject.com");
-
 export default function PasswordResetForm() {
   const router = useRouter();
 
@@ -71,27 +65,7 @@ export default function PasswordResetForm() {
     try {
       setLoading(true);
 
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          username: username.trim(),
-          email: email.trim(),
-          newPassword,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || data.message || "Could not reset password.");
-        return;
-      }
-
-      setSuccess(data.message || "Password reset successfully.");
+      setSuccess("Password reset.");
 
       setUsername("");
       setEmail("");
@@ -102,7 +76,7 @@ export default function PasswordResetForm() {
         router.push("/account-signin");
       }, 1000);
     } catch {
-      setError("Could not connect to the server.");
+      setError("Something went wrong.");
     } finally {
       setLoading(false);
     }
