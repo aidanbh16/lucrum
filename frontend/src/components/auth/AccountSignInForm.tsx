@@ -6,7 +6,10 @@ import Link from "next/link";
 import { authStyles } from "@/styles/auth";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_AMS_DOMAIN ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : "https://ams.lucrumproject.com");
 
 export default function AccountSignInForm() {
   const router = useRouter();
