@@ -6,7 +6,10 @@ import Link from "next/link";
 import { authStyles } from "@/styles/auth";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_AMS_DOMAIN ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : "https://ams.lucrumproject.com");
 
 export default function AccountCreationForm() {
   const router = useRouter();
@@ -21,39 +24,19 @@ export default function AccountCreationForm() {
   const [loading, setLoading] = useState(false);
 
   const validateForm = (): string => {
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim()
-    ) {
+    if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       return "All fields are required.";
     }
 
-    if (username.trim().length < 4) {
-      return "Username must be at least 4 characters long.";
-    }
+    if (username.trim().length < 4) return "Username must be at least 4 characters long.";
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      return "Please enter a valid email address.";
-    }
+    if (!emailRegex.test(email.trim())) return "Please enter a valid email address.";
 
-    if (password.length < 8) {
-      return "Password must be at least 8 characters long.";
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one capital letter.";
-    }
-
-    if (!/[^a-zA-Z0-9]/.test(password)) {
-      return "Password must contain at least one special character.";
-    }
-
-    if (password !== confirmPassword) {
-      return "Passwords do not match.";
-    }
+    if (password.length < 8) return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(password)) return "Password must contain at least one capital letter.";
+    if (!/[^a-zA-Z0-9]/.test(password)) return "Password must contain at least one special character.";
+    if (password !== confirmPassword) return "Passwords do not match.";
 
     return "";
   };
@@ -93,7 +76,6 @@ export default function AccountCreationForm() {
       }
 
       setSuccess(data.message || "Account successfully created!");
-
       setUsername("");
       setEmail("");
       setPassword("");
@@ -113,9 +95,7 @@ export default function AccountCreationForm() {
     <>
       <form onSubmit={handleSubmit} className={authStyles.form}>
         <div>
-          <label htmlFor="username" className={authStyles.label}>
-            Username
-          </label>
+          <label htmlFor="username" className={authStyles.label}>Username</label>
           <input
             id="username"
             name="username"
@@ -129,9 +109,7 @@ export default function AccountCreationForm() {
         </div>
 
         <div>
-          <label htmlFor="email" className={authStyles.label}>
-            Email
-          </label>
+          <label htmlFor="email" className={authStyles.label}>Email</label>
           <input
             id="email"
             name="email"
@@ -145,9 +123,7 @@ export default function AccountCreationForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className={authStyles.label}>
-            Password
-          </label>
+          <label htmlFor="password" className={authStyles.label}>Password</label>
           <input
             id="password"
             name="password"
@@ -161,9 +137,7 @@ export default function AccountCreationForm() {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className={authStyles.label}>
-            Confirm Password
-          </label>
+          <label htmlFor="confirmPassword" className={authStyles.label}>Confirm Password</label>
           <input
             id="confirmPassword"
             name="confirmPassword"
@@ -179,11 +153,7 @@ export default function AccountCreationForm() {
         {error && <div className={authStyles.errorBox}>{error}</div>}
         {success && <div className={authStyles.successBox}>{success}</div>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className={authStyles.button}
-        >
+        <button type="submit" disabled={loading} className={authStyles.button}>
           {loading ? "Creating Account..." : "Create Account"}
         </button>
       </form>

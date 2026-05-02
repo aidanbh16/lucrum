@@ -6,8 +6,12 @@ import MyIncome from "@/components/income/MyIncome";
 import { incomeStyles } from "@/styles/income";
 import Image from "next/image";
 
+// 🔥 FIXED: use AMS (auth service), NOT IMS
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_AMS_DOMAIN || "http://localhost:8080";
+  process.env.NEXT_PUBLIC_AMS_DOMAIN ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8080"
+    : "https://ams.lucrumproject.com");
 
 export default function Home() {
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -37,19 +41,19 @@ export default function Home() {
   }, []);
 
   const handleSignOut = async () => {
-  if (isSigningOut) return;
+    if (isSigningOut) return;
 
-  setIsSigningOut(true);
+    setIsSigningOut(true);
 
-  try {
-    await fetch(`${API_BASE_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-  } finally {
-    window.location.href = "/account-signin";
-  }
-};
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } finally {
+      window.location.href = "/account-signin";
+    }
+  };
 
   if (loading) {
     return <div className="text-white text-center mt-10">Loading...</div>;

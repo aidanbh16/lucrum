@@ -4,8 +4,11 @@ import { useState } from "react";
 import { incomeStyles } from "@/styles/income";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_IMS_DOMAIN || "http://localhost:8081";
-
+  process.env.NEXT_PUBLIC_IMS_DOMAIN ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:8081"
+    : "https://ims.lucrumproject.com");
+    
 type Stream = {
   id: string;
   source: string;
