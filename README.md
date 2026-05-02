@@ -61,5 +61,5 @@ Authentication state is managed via JWT tokens stored in HTTP-only cookies, with
 
 ## Instructions
 
-The YouTube video link below will walk through the steps needed to effectively run the Lucrum project through your own device:
+The YouTube video link below will walk through the steps needed to effectively run the Lucrum project through your own device: https://youtu.be/2uu_PGzhg7c
 
